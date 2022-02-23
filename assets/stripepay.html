@@ -1,0 +1,141 @@
+<html>
+<head>
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/css/bootstrap.min.css" integrity="sha384-Gn5384xqQ1aoWXA+058RXPxPg6fy4IWvTNh0E263XmFcJlSAwiGgFAW/dAiS6JXm" crossorigin="anonymous">
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
+    <script src="https://code.jquery.com/jquery-3.2.1.slim.min.js" integrity="sha384-KJ3o2DKtIkvYIK3UENzmM7KCkRr/rE9/Qpg6aAZGJwFDMVNA/GpGFF93hXpG5KkN" crossorigin="anonymous"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.12.9/umd/popper.min.js" integrity="sha384-ApNbgh9B+Y1QKtv3Rn7W3mgPxhU9K/ScQsAP7hUibX39j7fakFPskvXusvfa0b4Q" crossorigin="anonymous"></script>
+    <script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/js/bootstrap.min.js" integrity="sha384-JZR6Spejh4U02d8jOt6vLEHfe/JQGiRRSQQxSfFWpi1MquVdAyjUar5+76PVCmYl" crossorigin="anonymous"></script>
+</head>
+<body>
+<p class="payment-status" id="payment-errors">&nbsp;</p>
+<form id="paymentFrm">
+    <div class="form-group">
+        <p for="username" class="mb-1 theme-color-1">FULL NAME name (on the card)</p>
+        <input type="text" name="name" id="name" placeholder="Jason Doe" required class="form-control">
+    </div>
+    <div class="form-group">
+        <p for="email" class="mb-1 theme-color-1">Email</p>
+        <input type="email" name="email" id="email"  placeholder="test@example.com" required class="form-control">
+    </div>
+
+    <div class="form-group">
+
+
+
+    </div>
+
+    <div class="form-group">
+        <input type="hidden" name="item_price" class="form-control item_price" value="100" required />
+    </div>
+
+    <div class="form-group">
+        <p for="cardNumber" class="mb-1 theme-color-1">Card number</p>
+        <div class="input-group">
+            <input type="text" name="card-number" id="card-number" autocomplete="off" placeholder="Your card number" class="form-control" required>
+            <div class="input-group-append">
+                    <span class="input-group-text text-muted">
+                                                <i class="fa fa-cc-visa mx-1"></i>
+                                                <i class="fa fa-cc-amex mx-1"></i>
+                                                <i class="fa fa-cc-mastercard mx-1"></i>
+                                            </span>
+            </div>
+        </div>
+    </div>
+    <div class="row">
+        <div class="col-sm-8">
+            <div class="form-group">
+                <p class="hidden-xs theme-color-1 mb-1" > Expiration</p>
+                <div class="input-group">
+
+                    <input type="number" placeholder="MM" maxlength="2"  name="card-expiry-month" id="card-expiry-month" class="form-control" required>
+                    <input type="number" placeholder="YY" maxlength="2" name="card-expiry-year" id="card-expiry-year" class="form-control" required>
+                </div>
+            </div>
+        </div>
+        <div class="col-sm-4">
+            <div class="form-group mb-4">
+										<span data-toggle="tooltip" title="Three-digits code on the back of your card">CVV
+											<i class="fa fa-question-circle"></i>
+                                        </span>
+                <input type="text" name="card-cvc" id="card-cvc" required class="form-control">
+            </div>
+        </div>
+
+
+
+    </div>
+    <button type="submit" id="payBtn" class="confirm-button subscribe btn btn-primary btn-block rounded-pill shadow-sm"> Confirm  </button>
+</form>
+
+<script>
+	var total_amount = '200';
+	var currency = 'USD';
+	var stripe_key = 'sk_test_TMbUaFbCy6vreanBfGa64frP00mxfxxHiv';
+
+	$(document).ready(function (){
+  $(document).on("keyup", "#card-expiry-month", function () {
+	 console.log($(this).val().length);
+	 if($(this).val().length>2){
+		$(this).val($(this).val().slice(0, -1));
+	 }
+	});
+
+	$(document).on("keyup", "#card-expiry-year", function () {
+	 console.log($(this).val().length);
+	 if($(this).val().length>2){
+		$(this).val($(this).val().slice(0, -1));
+	 }
+	});
+});
+</script>
+
+
+<!-- Stripe JavaScript library -->
+
+
+<script type="text/javascript" src="https://js.stripe.com/v2/"></script>
+
+<!-- Below code for Stripe payment form -->
+<script type="text/javascript">
+		//set your publishable key
+		Stripe.setPublishableKey('pk_test_Vq7vPui3v2LZPWCzT9LBeaVv00RAS7HwZ1');
+
+		//callback to handle the response from stripe
+		function stripeResponseHandler(status, response) {
+			if (response.error) {
+				//enable the submit button
+				$('#payBtn').removeAttr("disabled");
+				//display the errors on the form
+				$('#payment-errors').addClass('alert alert-danger');
+				$("#payment-errors").html(response.error.message);
+			} else {
+				var form$ = $("#paymentFrm");
+				//get token id
+				var token = response['id'];
+				//insert the token into the form
+				form$.append("<input type='hidden' name='stripeToken' value='" + token + "' />");
+				//submit form to the server
+				//form$.get(0).submit();
+			}
+		}
+		$(document).ready(function() {
+			//on form submit
+			$("#paymentFrm").submit(function(event) {
+				//disable the submit button to prevent repeated clicks
+				$('#payBtn').attr("disabled", "disabled");
+
+				//create single-use token to charge the user
+				Stripe.createToken({
+					number: $('#card-number').val(),
+					cvc: $('#card-cvc').val(),
+					exp_month: $('#card-expiry-month').val(),
+					exp_year: $('#card-expiry-year').val()
+				}, stripeResponseHandler);
+
+				//submit from callback
+				return false;
+			});
+		});
+	</script>
+</body>
+</html>

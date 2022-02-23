@@ -1,0 +1,20 @@
+const String ROOT_ONLY="https://ozlisten.com/";
+const String ROOT_API= ROOT_ONLY + "api";
+const String REGISTRATION="$ROOT_API/signupuser";
+const String LOGIN="$ROOT_API/loginuser";
+const String SONGS_LIST="$ROOT_API/listaudio";
+const String SINGLE_AUDIO="$ROOT_API/getaudiosingle";
+const String ADD_TO_FEV="$ROOT_API/addtofavorite";
+const String FEV_LIST="$ROOT_API/favoritelist";
+const String FETCH_PROFILE="$ROOT_API/userprofile";
+final String UPLOAD_PROFILE_IMG="$ROOT_API/updateprofileimage";
+final String UPDATE_PROFILE_DATA="$ROOT_API/updateUserProfileData";
+final String CHANGE_ALBUMSTATUS="$ROOT_API/changealbumbstatus";
+final String FORGOT_PASSWORD ="$ROOT_API/forgotpassword";
+final String ADD_REVIEW ="$ROOT_API/addreview";
+final String LIST_ALBUM ="$ROOT_API/listalbum";
+final String STRIPE ="$ROOT_API/paywithstripe";
+final String STRIPE_KEYS ="$ROOT_API/getstripekeys";
+final String IMAGE_TRANSPARENT = "images/img_transparent.png";
+
+final kApiUrl = 'https://api.stripe.com/v1';
