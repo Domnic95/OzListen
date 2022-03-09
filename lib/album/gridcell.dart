@@ -1,11 +1,16 @@
+import 'package:com.ozlisten.ozlistenapp/album/services.dart';
 import 'package:com.ozlisten.ozlistenapp/api/api.dart';
 import 'package:com.ozlisten.ozlistenapp/custom_assets/colors.dart';
+import 'package:com.ozlisten.ozlistenapp/profile/credit_provider.dart';
+import 'package:com.ozlisten.ozlistenapp/profile/modal/credit_modal.dart';
 import 'package:com.ozlisten.ozlistenapp/stripe/custom_card_payment_screen.dart';
+import 'package:com.ozlisten.ozlistenapp/stripe/loading_button.dart';
 import 'package:com.ozlisten.ozlistenapp/tabcontroller/tabs.dart';
 import 'package:com.ozlisten.ozlistenapp/utils/p.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/material.dart' as Card;
 import 'package:flutter_rating_bar/flutter_rating_bar.dart';
+import 'package:provider/provider.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 import 'album.dart';
@@ -25,6 +30,42 @@ class AlbumCell extends StatelessWidget {
     await Navigator.of(context).push(MaterialPageRoute(builder: (_) {
       return CustomCardPaymentScreen(amount: price, album: album);
     }));
+  }
+
+  payViaCredit(BuildContext context, String price) async {
+    bool lp = true;
+    String methodName = 'payViaNewCard gridcell.dart';
+    p('-->30 start of method ', '------------', methodName, lp);
+    if (double.parse(
+            Provider.of<CreditProvider>(context, listen: false).user_credit) ==
+        0.0) {
+      showDialog(
+          context: context,
+          builder: (context) {
+            return AlertDialog(
+              content: Text("Add credit to your wallet to buy audio"),
+              actions: [
+                InkWell(
+                  onTap: () {
+                    Navigator.pop(context);
+                  },
+                  child: Padding(
+                    padding: const EdgeInsets.all(8.0),
+                    child: Text("ok"),
+                  ),
+                )
+              ],
+            );
+          });
+      return;
+    }
+    showDialog(
+        context: context,
+        builder: (context) {
+          return PaymentDialog(
+            album: album,
+          );
+        });
   }
 
   int increment = -1;
@@ -143,7 +184,10 @@ class AlbumCell extends StatelessWidget {
                         itemSize: 12.0,
                         direction: Axis.horizontal,
                       ),
-                      Text(album.total_reviews, textAlign: TextAlign.start),
+                      Text(
+                        album.total_reviews,
+                        textAlign: TextAlign.start,
+                      ),
                     ])),
                 const Expanded(child: Text('')),
                 Container(
@@ -153,10 +197,13 @@ class AlbumCell extends StatelessWidget {
                           ? !album.current_user_paid
                               ? TextButton(
                                   onPressed: () {
-                                    payViaNewCard(context, album.price);
+                                    payViaCredit(context, album.price);
                                   },
-                                  child: Text('Buy',
-                                      style: TextStyle(color: Colors.blue)))
+                                  child: Text(
+                                    'Buy',
+                                    style: TextStyle(color: Colors.blue),
+                                  ),
+                                )
                               : Text('Paid',
                                   style: TextStyle(color: Colors.green))
                           : Container(),
@@ -242,5 +289,79 @@ class AlbumCell extends StatelessWidget {
   Future<bool> setStringValue(String key, value) async {
     final SharedPreferences pref = await SharedPreferences.getInstance();
     return pref.setString(key, value);
+  }
+}
+
+class PaymentDialog extends StatefulWidget {
+  final Album album;
+  const PaymentDialog({this.album, Key key}) : super(key: key);
+
+  @override
+  State<PaymentDialog> createState() => _PaymentDialogState();
+}
+
+class _PaymentDialogState extends State<PaymentDialog> {
+  @override
+  Widget build(BuildContext context) {
+    final creditNotifier = Provider.of<CreditProvider>(context);
+    return Center(
+      child: Container(
+        width: MediaQuery.of(context).size.width * .8,
+        color: Colors.white,
+        child: Padding(
+          padding: const EdgeInsets.all(8.0),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Text(
+                widget.album.title,
+                style: Theme.of(context).textTheme.bodyText1,
+              ),
+              const SizedBox(
+                height: 10,
+              ),
+              Text(
+                  "Credit in wallet: " + creditNotifier.user_credit.toString()),
+              Text("price: " + widget.album.price),
+              const SizedBox(
+                height: 10,
+              ),
+              LoadingButton(
+                text: "pay",
+                onPressed: () async {
+                  final res =
+                      await Provider.of<CreditProvider>(context, listen: false)
+                          .buyFromCredit(widget.album);
+                  if (res == true) {
+                    Provider.of<AlbumNotifier>(context, listen: false)
+                        .refersh();
+                    Navigator.pop(context);
+                    showDialog(
+                        context: context,
+                        builder: (context) {
+                          return AlertDialog(
+                            content: Text("Album bought successfully"),
+                            actions: [
+                              InkWell(
+                                onTap: () {
+                                  Navigator.pop(context);
+                                },
+                                child: Padding(
+                                  padding: const EdgeInsets.all(8.0),
+                                  child: Text("ok"),
+                                ),
+                              )
+                            ],
+                          );
+                        });
+                  }
+                },
+              )
+            ],
+            mainAxisSize: MainAxisSize.min,
+          ),
+        ),
+      ),
+    );
   }
 }

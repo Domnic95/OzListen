@@ -6,6 +6,7 @@ import 'package:com.ozlisten.ozlistenapp/custom_assets/colors.dart';
 import 'package:com.ozlisten.ozlistenapp/utils/p.dart';
 import 'package:com.ozlisten.ozlistenapp/widgets/nothing_to_show.dart';
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 import 'gridcell.dart';
@@ -54,7 +55,8 @@ class GridViewDemoState extends State<GridViewMain> {
                     onTap: () {},
                   );
                 },
-              ).toList()),
+              ).toList(),
+            ),
     );
   }
 
@@ -66,6 +68,7 @@ class GridViewDemoState extends State<GridViewMain> {
 
   @override
   Widget build(BuildContext context) {
+    final albumNotifier = Provider.of<AlbumNotifier>(context);
     bool lp = false;
     String methodName = 'build gridViewMain';
     p('-->67 build', '-----------', methodName, lp);
@@ -73,9 +76,7 @@ class GridViewDemoState extends State<GridViewMain> {
       appBar: AppBar(
         automaticallyImplyLeading: false,
         backgroundColor: primaryColor,
-        title: widget.paidOnly
-            ? Text('Purchased items')
-            : Text('Albums'),
+        title: widget.paidOnly ? Text('Purchased items') : Text('Albums'),
       ),
       body: Column(
         mainAxisAlignment: MainAxisAlignment.start,
@@ -84,7 +85,7 @@ class GridViewDemoState extends State<GridViewMain> {
         children: <Widget>[
           Flexible(
             child: FutureBuilder<List<Album>>(
-              future: _future,
+              future: albumNotifier.getPhotos(),
               builder: (context, snapshot) {
                 if (snapshot.hasError) {
                   return Text('Error ${snapshot.error}');
@@ -93,18 +94,18 @@ class GridViewDemoState extends State<GridViewMain> {
                   p('-->97 snapshot.data', snapshot.data, methodName, lp);
                   List<Album> list = snapshot.data;
                   List<Album> filtered = list;
-                    filtered = <Album>[];
-                    for (int i = 0; i < list.length; i++) {
-                      if (list[i].status == '1') {
-                        if(widget.paidOnly){
-                          if(list[i].current_user_paid){
-                            filtered.add(list[i]);
-                          }
-                        }else{
+                  filtered = <Album>[];
+                  for (int i = 0; i < list.length; i++) {
+                    if (list[i].status == '1') {
+                      if (widget.paidOnly) {
+                        if (list[i].current_user_paid) {
                           filtered.add(list[i]);
                         }
+                      } else {
+                        filtered.add(list[i]);
                       }
                     }
+                  }
                   streamController.sink.add(filtered.length);
                   return gridview(filtered);
                 } else

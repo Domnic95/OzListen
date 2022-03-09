@@ -712,13 +712,15 @@ class MapScreenState extends State<ProfilePage>
       'password': _passwordController.text
     };
     print(data.toString());
-    final response = await http.post(Uri.parse(UPDATE_PROFILE_DATA),
-        headers: {
-          "Accept": "application/json",
-          "Content-Type": "application/x-www-form-urlencoded"
-        },
-        body: data,
-        encoding: Encoding.getByName("utf-8"));
+    final response = await http.post(
+      Uri.parse(UPDATE_PROFILE_DATA),
+      headers: {
+        "Accept": "application/json",
+        "Content-Type": "application/x-www-form-urlencoded"
+      },
+      body: data,
+      encoding: Encoding.getByName("utf-8"),
+    );
     setState(() {
       isLoading = false;
     });

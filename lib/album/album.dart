@@ -1,3 +1,5 @@
+import 'dart:developer';
+
 class Album {
   String id;
   String title;
@@ -18,9 +20,28 @@ class Album {
   bool current_user_paid;
   String base_url;
 
-  Album({this.id, this.title, this.url, this.thumbnailUrl,this.stars,this.ifpaid, this.author, this.description, this.status, this.dateCreated, this.price, this.rating, this.sort, this.total_reviews, this.avarge_reviews, this.current_user_paid, this.base_url, this.image});
+  Album(
+      {this.id,
+      this.title,
+      this.url,
+      this.thumbnailUrl,
+      this.stars,
+      this.ifpaid,
+      this.author,
+      this.description,
+      this.status,
+      this.dateCreated,
+      this.price,
+      this.rating,
+      this.sort,
+      this.total_reviews,
+      this.avarge_reviews,
+      this.current_user_paid,
+      this.base_url,
+      this.image});
 
   factory Album.fromJson(Map<String, dynamic> json) {
+    log(json['id'].toString() + json['title']);
     return Album(
       id: json['id'] as String,
       title: json['title'] as String,
@@ -31,7 +52,6 @@ class Album {
       thumbnailUrl: json['image'] as String,
       ifpaid: json['ifpaid'] as String,
       image: json['image'] as String,
-
       price: json['price'] as String,
       rating: json['rating'] as String,
       sort: json['sort'] as String,

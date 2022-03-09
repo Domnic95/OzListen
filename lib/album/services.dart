@@ -2,30 +2,39 @@ import 'dart:convert';
 
 import 'package:com.ozlisten.ozlistenapp/api/api.dart';
 import 'package:com.ozlisten.ozlistenapp/utils/p.dart';
+import 'package:flutter/cupertino.dart';
 
 import 'album.dart';
 import 'package:http/http.dart' as http;
 import 'package:shared_preferences/shared_preferences.dart';
 
-class Services {
+class AlbumNotifier extends ChangeNotifier {
+  List<Album> albums;
+  Future<List<Album>> getPhotos() {
+    return Services.getPhotos();
+  }
 
+  refersh() {
+    notifyListeners();
+  }
+}
+
+class Services {
   static Future<List<Album>> getPhotos() async {
     bool lp = false;
     String methodName = 'getPhotos Services';
     p('-->14 start ', '=============', methodName, lp);
     List<Album> list;
 
-    Map data = {
-      'token': await getStringValue('token')};
+    Map data = {'token': await getStringValue('token')};
     try {
-      final response = await http.post( Uri.parse(LIST_ALBUM),
-        headers: {
-        "Accept": "application/json",
-        "Content-Type": "application/x-www-form-urlencoded"
-        },
+      final response = await http.post(Uri.parse(LIST_ALBUM),
+          headers: {
+            "Accept": "application/json",
+            "Content-Type": "application/x-www-form-urlencoded"
+          },
           body: data,
-          encoding: Encoding.getByName("utf-8")
-      );
+          encoding: Encoding.getByName("utf-8"));
       p('-->24 response.body', response.body, methodName, lp);
 
       if (response.statusCode == 200) {
@@ -53,7 +62,7 @@ class Services {
     return fff;
   }
 
-  static Future<String> getStringValue(String key) async{
+  static Future<String> getStringValue(String key) async {
     final SharedPreferences pref = await SharedPreferences.getInstance();
     return pref.getString(key);
   }

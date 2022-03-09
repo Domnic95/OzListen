@@ -1,5 +1,7 @@
 import 'dart:io';
 
+import 'package:com.ozlisten.ozlistenapp/album/services.dart';
+import 'package:com.ozlisten.ozlistenapp/profile/credit_provider.dart';
 import 'package:flutter/material.dart';
 import 'package:com.ozlisten.ozlistenapp/audio_service/audio_player_service.dart';
 import 'package:com.ozlisten.ozlistenapp/audio_service/just_audio_player.dart';
@@ -43,6 +45,16 @@ class MyAppStart extends StatelessWidget {
   Widget build(BuildContext context) {
     return MultiProvider(
       providers: [
+        ChangeNotifierProvider<CreditProvider>(
+          create: (cnt) {
+            return CreditProvider();
+          },
+        ),
+        ChangeNotifierProvider<AlbumNotifier>(
+          create: (cnt) {
+            return AlbumNotifier();
+          },
+        ),
         Provider<AudioPlayerService>(
           create: (_) => JustAudioPlayer(),
           dispose: (_, value) {
@@ -53,9 +65,10 @@ class MyAppStart extends StatelessWidget {
       child: MaterialApp(
         debugShowCheckedModeBanner: false,
         home: Provider(
-            create: (BuildContext context) {},
-            // child: true
-            child: isLoggedInGlobal ? SplashScreen() : Login_screen()),
+          create: (BuildContext context) {},
+          // child: true
+          child: isLoggedInGlobal ? SplashScreen() : Login_screen(),
+        ),
         // : TabContainerBottom(selectedIndex: MAIN_FREE)),
       ),
     );
